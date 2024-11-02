@@ -12,7 +12,20 @@ def scrape_appraiser_house_info():
         soup = BeautifulSoup(response.text, "html.parser")
         #scraping address and parsel
         df = scrape_address_parcel(soup)
-        df1 = scrape_neighborhood(soup)
+        df1 = scrape_neighborhood(soup) #need to join this first 
+        df2 = scrape_appraiser_house_info(soup) # joining after neighborhood is joined
+        headers = df1.columns
+        rows = df1.values.tolist()
+        print("Before dropping")
+        print(df1)
+        for val in headers:
+            if val != "Neighborhood Name":
+                df1.drop(val, axis=1, inplace=True)
+        for i, index in enumerate(rows):
+            if i != 0:
+                df1.drop(index, axis=0, inplace=True)
+        print("After drops")
+        print(df1)
 
     else: 
         print("response failed")
