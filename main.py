@@ -4,7 +4,7 @@ import bs4
 from bs4 import BeautifulSoup
 
 
-url = "https://cp.spokanecounty.org/SCOUT/propertyinformation/Summary.aspx?PID=35084.2405"
+url = "https://cp.spokanecounty.org/SCOUT/propertyinformation/Summary.aspx?PID=35294.0414"
 def scrape_appraiser_house_info():
     response = requests.get(url)
     if response.status_code == 200: #populated well
@@ -14,13 +14,17 @@ def scrape_appraiser_house_info():
         df = scrape_address_parcel(soup)
         df1 = scrape_neighborhood(soup) #need to join this first 
         df2 = scrape_home_table(soup) # joining after neighborhood is joined
-        # headers = df1.columns
-        # rows = df1.values.tolist()
-        # print("Before dropping")
-        # print(df1)
-        # for val in headers:
-        #     if val != "Neighborhood Name":
-        #         df1.drop(val, axis=1, inplace=True)
+        headers = df1.columns
+        print(df1)
+        values_to_drop = []
+        for val in headers:
+            if val != "Neighborhood Name":
+                values_to_drop.append(val)
+        df3 = pd.DataFrame(df1.drop(values_to_drop, axis=1), columns=["Neighborhood Name"])
+        print(df3)
+        joined_df = df.join(df3, how='left') 
+        print(joined_df)
+        
         # for i, index in enumerate(rows):
         #     if i != 0:
         #         df1.drop(index, axis=0, inplace=True)
@@ -30,6 +34,7 @@ def scrape_appraiser_house_info():
     else: 
         print("response failed")
     df.to_csv("output.csv")
+    return joined_df
 
 def scrape_neighborhood(soup):
     table = soup.find("table", attrs={"id": "MainContent_Appraisal_GridView3"})
